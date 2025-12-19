@@ -18,7 +18,8 @@ test("it returns paginated todos", function () {
         ->assertJsonPath('meta.per_page', 20);
 });
 
-test("can create todo", function() {
+
+test("can create todo", function () {
     $data = [
         'title' => "Todo title",
         'description' => "Todo description",
@@ -26,5 +27,32 @@ test("can create todo", function() {
 
     $response = $this->postJson('api/v1/todos', $data);
 
+    $data = $response->json('data');
+
     $response->assertStatus(201);
+
+    expect($data['title'])->toBe("Todo title");
 });
+
+
+test("return specific todo based on id", function () {
+
+    $todo1 = Todo::factory()->create([
+        'title' => "Todo title",
+        'description' => "Todo description",
+    ]);
+
+    $todo2 = Todo::factory()->create([
+        'title' => "Todo title 2",
+        'description' => "Todo description 2",
+    ]);
+
+    $response = $this->getJson("api/v1/todos/{$todo2['id']}");
+    $data = $response->json('data');
+
+    $response->assertStatus(200);
+
+    expect($data['title'])->toBe("Todo title 2");
+    expect($data['description'])->toBe("Todo description 2");
+});
+

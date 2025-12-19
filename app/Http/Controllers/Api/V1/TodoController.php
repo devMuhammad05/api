@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Todo;
+use App\Enums\Status;
 use Illuminate\Http\Request;
+use App\Action\GetTodoAction;
+use Illuminate\Validation\Rule;
 use App\Action\CreateTodoAction;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TodoResource;
+use App\Http\Requests\GetTodoRequest;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
 
@@ -16,13 +20,13 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(GetTodoAction $getTodoAction, Request $request): JsonResponse
     {
-        $todos = Todo::paginate(20);
+        $todos = $getTodoAction->execute($request);
         return TodoResource::collection($todos)
-        ->response()
-        ->setStatusCode(200);
+            ->response();
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -45,7 +49,6 @@ class TodoController extends Controller
         return (new TodoResource($todo))
             ->response()
             ->setStatusCode(200);
-
     }
 
     /**
@@ -57,8 +60,8 @@ class TodoController extends Controller
         $todo->update($data);
 
         return (new TodoResource($todo))
-                ->response()
-                ->setStatusCode(200);
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
