@@ -16,10 +16,12 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $todos = Todo::paginate(20);
-        return TodoResource::collection($todos);
+        return TodoResource::collection($todos)
+        ->response()
+        ->setStatusCode(200);
     }
 
     /**
