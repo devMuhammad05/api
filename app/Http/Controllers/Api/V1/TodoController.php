@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TodoResource;
 use App\Http\Requests\StoreTodoRequest;
+use App\Http\Requests\UpdateTodoRequest;
 
 class TodoController extends Controller
 {
@@ -17,7 +18,7 @@ class TodoController extends Controller
      */
     public function index()
     {
-        $todos = Todo::all();
+        $todos = Todo::paginate(20);
         return TodoResource::collection($todos);
     }
 
@@ -37,24 +38,34 @@ class TodoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Todo $todo)
     {
-        //
+        return (new TodoResource($todo))
+            ->response()
+            ->setStatusCode(200);
+
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateTodoRequest $request, Todo $todo): JsonResponse
     {
-        //
+        $data = $request->validated();
+        $todo->update($data);
+
+        return (new TodoResource($todo))
+                ->response()
+                ->setStatusCode(200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Todo $todo): JsonResponse
     {
-        //
+        $todo->delete();
+
+        return response()->json([], 204);
     }
 }
