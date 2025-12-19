@@ -7,7 +7,7 @@ uses(RefreshDatabase::class);
 
 
 test("it returns paginated todos", function () {
-    Todo::factory(30)->create();
+    $todo = Todo::factory(30)->create();
 
     $response = $this->getJson('api/v1/todos');
 
@@ -56,3 +56,28 @@ test("return specific todo based on id", function () {
     expect($data['description'])->toBe("Todo description 2");
 });
 
+
+test("can update todo", function() {
+
+    $todo = Todo::factory()->create();
+
+    $updatedData = [
+        'title' => "Todo title",
+        'description' => "Todo description",
+    ];
+
+    $response = $this->putJson("api/v1/todos/{$todo->id}", $updatedData);
+    $responseData = $response->json('data');
+
+    $response->assertStatus(200)
+    ->assertJson([
+        'data' => $updatedData
+    ]);
+
+    $this->assertDatabaseHas('todos', [
+        'id' => $todo->id,
+        'title' => "Todo title",
+        'description' => "Todo description",
+    ]);
+
+});
